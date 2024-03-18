@@ -4,7 +4,10 @@ import secrets as secrets
 
 import google.generativeai as genai
 
-from naukriScrapping import scrape_website
+from naukriScrapping import scrape_naukri
+from indeedScraping import scrape_indeed
+from glassdoorScraping import scrape_glassdoor
+from monsterScraping import scrape_monster
 
 
 from dotenv import load_dotenv
@@ -57,10 +60,9 @@ def call_gemini_api(search_query):
 
     initialPrompt = "Extract these 4 keywords from given prompt Job Title, Experience, Location, Work Mode. For Example if the prompt is Flutter Developer Internships in gurugram in office, then i want response as Job Title: Flutter Developer Internship Experience: Any, Location: Gurugram, Work Mode: in office.Use NA if anything is missing. here is the prompt: "
     convo.send_message(initialPrompt + search_query)
-    print(convo.last.text)
+    # print(convo.last.text)
 
     return convo.last.text
-
 
 
 # Streamlit app
@@ -74,21 +76,70 @@ def main():
         gemini_response = call_gemini_api(search_query)
         print(gemini_response)
         job_info = parse_gemini_response(gemini_response)
+        print(job_info)
 
-        scraped_jobs = scrape_website(job_info)
+        scraped_naukri_jobs = scrape_naukri(job_info)
 
+        i = 1
         # Display the list of scraped jobs using Streamlit components
-        if scraped_jobs:
-            st.write('### Scraped Jobs:')
-            for job in scraped_jobs:
-                st.write(f'**Heading:** {job["Heading"]}')
-                st.write(f'**Sub Heading:** {job["Sub Heading"]}')
-                st.write(f'**Experience Needed:** {job["Experience Needed"]}')
-                st.write(f'**Salary:** {job["Salary"]}')
-                st.write(f'**Vacancy Link:** [{job["Link"]}')
+        if scraped_naukri_jobs:
+            st.write('### Jobs according to your perference:')
+            for job in scraped_naukri_jobs:
+                st.write(f'**Job {i}:** {job["Heading"]} @ naukri.com') # Heading
+                st.write(f'**Company:** {job["Sub Heading"]}') # Sub Heading
+                st.write(f'**Experience Needed:** {job["Experience Needed"]}') # Experience Needed
+                st.write(f'**Salary:** {job["Salary"]}') # Salary
+                st.write(f'**Vacancy Link:** [{job["Link"]}]') # Vacancy Link
                 st.write('---')
+                i += 1
         else:
             st.write('No jobs found.')
+            
+        # scraped_indeed_jobs = scrape_indeed(job_info)
+        # scraped_glassdoor_jobs = scrape_glassdoor(job_info)
+        scraped_monster_jobs = scrape_monster(job_info)
+
+
+        # if scraped_glassdoor_jobs:
+        #     st.write('### Naukri.com Jobs according to your perference:')
+        #     i = 1
+        #     for job in scraped_glassdoor_jobs:
+        #         st.write(f'**Job {i}:** {job["Heading"]}') # Heading
+        #         st.write(f'**Company:** {job["Sub Heading"]}') # Sub Heading
+        #         st.write(f'**Experience Needed:** {job["Experience Needed"]}') # Experience Needed
+        #         st.write(f'**Salary:** {job["Salary"]}') # Salary
+        #         st.write(f'**Vacancy Link:** [{job["Link"]}]') # Vacancy Link
+        #         st.write('---')
+        #         i += 1
+        # else:
+        #     st.write('No jobs found.')   
+            
+        # if scraped_indeed_jobs:
+        #     st.write('### Naukri.com Jobs according to your perference:')
+        #     i = 1
+        #     for job in scraped_indeed_jobs:
+        #         st.write(f'**Job {i}:** {job["Heading"]}') # Heading
+        #         st.write(f'**Company:** {job["Sub Heading"]}') # Sub Heading
+        #         st.write(f'**Experience Needed:** {job["Experience Needed"]}') # Experience Needed
+        #         st.write(f'**Salary:** {job["Salary"]}') # Salary
+        #         st.write(f'**Vacancy Link:** [{job["Link"]}]') # Vacancy Link
+        #         st.write('---')
+        #         i += 1
+        # else:
+        #     st.write('No jobs found.')        
+
+        if scraped_monster_jobs:
+            # st.write('### Naukri.com Jobs according to your perference:')
+            for job in scraped_monster_jobs:
+                st.write(f'**Job {i}:** {job["Heading"]} @ monster.com') # Heading
+                st.write(f'**Company:** {job["Sub Heading"]}') # Sub Heading
+                st.write(f'**Experience Needed:** {job["Experience Needed"]}') # Experience Needed
+                st.write(f'**Location:** {job["Location"]}') # Salary
+                st.write(f'**Vacancy Link:** [{job["Link"]}]') # Vacancy Link
+                st.write('---')
+                i += 1
+        else:
+            st.write('No jobs found.')  
 
         # st.write('### Job Information:')
         # st.write(f'**Job Title:** {job_info["Job Title"]}')
@@ -97,7 +148,6 @@ def main():
         # st.write(f'**Work Mode:** {job_info["Work Mode"]}')
 
         # Print clean dictionary of Gemini response in terminal
-        print(job_info)
 
 def parse_gemini_response(input_string):
     

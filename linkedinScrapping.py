@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 import time
 import csv
 
-def scrape_naukri(job_info):
+def scrape_linkedin(job_info):
 
      # Set Chrome options for headless browsing
     chrome_options = Options()
@@ -19,7 +19,9 @@ def scrape_naukri(job_info):
     scraped_jobs = []
 
     # Update the URL of Naukri Page! ( Make Sure that the page link which you're putting must be a job listing page and it must have Next page buttons. )
-    driver.get(f"https://www.naukri.com/{job_info["Job Title"]}-jobs-in-{job_info["Location"]}&experience={job_info["Experience"]}")
+    # driver.get(f"https://www.naukri.com/{job_info["Job Title"]}-jobs-in-{job_info["Location"]}&experience={job_info["Experience"]}")
+    url = f"https://www.linkedin.com/jobs/search/?currentJobId=3841909085&f_E=2&geoId=115884833&keywords={job_info["Job Title"]}&location={job_info["Location"]}%2C%20India&origin=JOB_SEARCH_PAGE_LOCATION_AUTOCOMPLETE&refresh=true"
+    driver.get(url)
 
     count = 10  # Update the Number of Vacancy count you want to scrape.
 

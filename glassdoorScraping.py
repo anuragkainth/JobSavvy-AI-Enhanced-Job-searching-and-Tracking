@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 import time
 import csv
 
-def scrape_naukri(job_info):
+def scrape_glassdoor(job_info):
 
      # Set Chrome options for headless browsing
     chrome_options = Options()
@@ -19,7 +19,7 @@ def scrape_naukri(job_info):
     scraped_jobs = []
 
     # Update the URL of Naukri Page! ( Make Sure that the page link which you're putting must be a job listing page and it must have Next page buttons. )
-    driver.get(f"https://www.naukri.com/{job_info["Job Title"]}-jobs-in-{job_info["Location"]}&experience={job_info["Experience"]}")
+    driver.get(f"https://www.glassdoor.co.in/Job/{job_info["Location"]}-{job_info["Job Title"]}-jobs-SRCH_IL.0,15_IC2921225_KO16,32.htm")
 
     count = 10  # Update the Number of Vacancy count you want to scrape.
 
@@ -32,11 +32,11 @@ def scrape_naukri(job_info):
     # experience_xpath = '(//*[@class="jobTuple bgWhite br4 mb-8"])['+index+']/div/div/ul/li[1]/span'
     # salary_xpath = '(//*[@class="jobTuple bgWhite br4 mb-8"])['+index+']/div/div/ul/li[2]/span'
 
-    heading_xpath = '(//*[@class="cust-job-tuple layout-wrapper lay-2 sjw__tuple "])[' + index + ']/div[@class=" row1"]/a'
-    link_xpath = '(//*[@class="cust-job-tuple layout-wrapper lay-2 sjw__tuple "])[' + index + ']/div[@class=" row1"]/a'   
-    subheading_xpath = '(//*[@class="cust-job-tuple layout-wrapper lay-2 sjw__tuple "])[' + index + ']/div[@class=" row2"]/span[@class=" comp-dtls-wrap"]/a'
-    experience_xpath = '(//*[@class="cust-job-tuple layout-wrapper lay-2 sjw__tuple "])[' + index + ']/div[@class=" row3"]/div[@class="job-details "]/span[@class="exp-wrap"]/span[@class="ni-job-tuple-icon ni-job-tuple-icon-srp-experience exp"]/span'
-    salary_xpath = '(//*[@class="cust-job-tuple layout-wrapper lay-2 sjw__tuple "])[' + index + ']/div[@class=" row3"]/div[@class="job-details "]/span[@class="sal-wrap ver-line"]/span[@class="ni-job-tuple-icon ni-job-tuple-icon-srp-rupee sal"]'
+    heading_xpath = '(//*[@class="JobCard_jobTitle___7I6y"])[index]'
+    link_xpath = '(//*[@class="JobCard_jobTitle___7I6y"])[index]/@href'
+    subheading_xpath = '(//*[@class="JobCard_location__rCz3x"])[index]'
+    experience_xpath = '(//*[@class="JobCard_salaryEstimate__arV5J"])[index]'
+    salary_xpath = '(//*[@class="JobCard_salaryEstimate__arV5J"])[index]'
 
     csv_file = open('Naukri_scrape.csv', 'a', encoding="utf-8", newline='')
     csv_writer = csv.writer(csv_file)
@@ -52,7 +52,8 @@ def scrape_naukri(job_info):
             link_xpath = link_xpath.replace(index, temp_index)
             subheading_xpath = subheading_xpath.replace(index, temp_index)
             experience_xpath = experience_xpath.replace(index, temp_index)
-            salary_xpath = salary_xpath.replace(index, temp_index)
+            salary_xpath = salary_xpath.replace
+            (index, temp_index)
             index = str(new_index).zfill(2)
 
             heading = ""
