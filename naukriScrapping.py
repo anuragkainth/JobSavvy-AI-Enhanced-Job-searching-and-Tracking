@@ -19,7 +19,7 @@ def scrape_naukri(job_info):
     scraped_jobs = []
 
     # Update the URL of Naukri Page! ( Make Sure that the page link which you're putting must be a job listing page and it must have Next page buttons. )
-    driver.get(f"https://www.naukri.com/{job_info["Job Title"]}-jobs-in-{job_info["Location"]}&experience={job_info["Experience"]}")
+    driver.get(f"https://www.naukri.com/{job_info["job title"]}-jobs-in-{job_info["location"]}&experience={job_info["experience"]}")
 
     count = 10  # Update the Number of Vacancy count you want to scrape.
 

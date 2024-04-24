@@ -1,104 +1,82 @@
 # Install selenium using command " pip install selenium "
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import time
 import csv
 
-def scrape_linkedin(job_info):
+def scrape_linkedin():
 
-     # Set Chrome options for headless browsing
-    chrome_options = Options()
-    chrome_options.add_argument("--headless") 
+    # Set Firefox options for headless browsing
+    firefox_options = Options()
+    firefox_options.headless = True
 
-    driver = webdriver.Chrome()
+    driver = webdriver.Firefox(options=firefox_options)
     wait = WebDriverWait(driver, 20)
 
     scraped_jobs = []
 
-    # Update the URL of Naukri Page! ( Make Sure that the page link which you're putting must be a job listing page and it must have Next page buttons. )
-    # driver.get(f"https://www.naukri.com/{job_info["Job Title"]}-jobs-in-{job_info["Location"]}&experience={job_info["Experience"]}")
-    url = f"https://www.linkedin.com/jobs/search/?currentJobId=3841909085&f_E=2&geoId=115884833&keywords={job_info["Job Title"]}&location={job_info["Location"]}%2C%20India&origin=JOB_SEARCH_PAGE_LOCATION_AUTOCOMPLETE&refresh=true"
+    # Update the URL of the LinkedIn job listing page
+    url = f"https://www.linkedin.com/jobs/search/?keywords=software%20engineer&location=Bangalore%2C%20India"
+
     driver.get(url)
 
     count = 10  # Update the Number of Vacancy count you want to scrape.
 
-    index, new_index, i = '0', 1, 0  # This the the index variable of the elements from which data will be Scraped
-    # Xpaths of the various element from which data will be scraped.
+    index, new_index, i = '1', 1, 0  # This is the index variable of the elements from which data will be scraped
 
-    # heading_xpath = '(//*[@class="jobTuple bgWhite br4 mb-8"])['+index+']/div/div/a'
-    # link_xpath = '(//*[@class="jobTuple bgWhite br4 mb-8"])['+index+']/div/div/a'
-    # subheading_xpath = '(//*[@class="jobTuple bgWhite br4 mb-8"])['+index+']/div/div/div/a'
-    # experience_xpath = '(//*[@class="jobTuple bgWhite br4 mb-8"])['+index+']/div/div/ul/li[1]/span'
-    # salary_xpath = '(//*[@class="jobTuple bgWhite br4 mb-8"])['+index+']/div/div/ul/li[2]/span'
-
-    heading_xpath = '(//*[@class="cust-job-tuple layout-wrapper lay-2 sjw__tuple "])[' + index + ']/div[@class=" row1"]/a'
-    link_xpath = '(//*[@class="cust-job-tuple layout-wrapper lay-2 sjw__tuple "])[' + index + ']/div[@class=" row1"]/a'   
-    subheading_xpath = '(//*[@class="cust-job-tuple layout-wrapper lay-2 sjw__tuple "])[' + index + ']/div[@class=" row2"]/span[@class=" comp-dtls-wrap"]/a'
-    experience_xpath = '(//*[@class="cust-job-tuple layout-wrapper lay-2 sjw__tuple "])[' + index + ']/div[@class=" row3"]/div[@class="job-details "]/span[@class="exp-wrap"]/span[@class="ni-job-tuple-icon ni-job-tuple-icon-srp-experience exp"]/span'
-    salary_xpath = '(//*[@class="cust-job-tuple layout-wrapper lay-2 sjw__tuple "])[' + index + ']/div[@class=" row3"]/div[@class="job-details "]/span[@class="sal-wrap ver-line"]/span[@class="ni-job-tuple-icon ni-job-tuple-icon-srp-rupee sal"]'
-
-    csv_file = open('Naukri_scrape.csv', 'a', encoding="utf-8", newline='')
+    csv_file = open('LinkedIn_scrape.csv', 'a', encoding="utf-8", newline='')
     csv_writer = csv.writer(csv_file)
     # Writing the Heading of CSV file.
-    csv_writer.writerow(['Heading', 'Sub Heading', 'Vacancy Link', 'Experience Needed', 'Salary'])
+    csv_writer.writerow(['Position Name', 'Company Name', 'Location', 'Apply URL'])
 
     while i < count:
 
         for j in range(20):
             # Here we're replacing the Old index count of Xpath with New Index count.
-            temp_index = str(new_index).zfill(2)  # Zfill(2) is used to put zeros to the left of any digit till 2 decimal places.
-            heading_xpath = heading_xpath.replace(index, temp_index)
-            link_xpath = link_xpath.replace(index, temp_index)
-            subheading_xpath = subheading_xpath.replace(index, temp_index)
-            experience_xpath = experience_xpath.replace(index, temp_index)
-            salary_xpath = salary_xpath.replace(index, temp_index)
-            index = str(new_index).zfill(2)
+            temp_index = str(new_index)
+            position_xpath = f'(.//li[@data-occludable-job-id])[{temp_index}]//a[contains(@class, "job-card-list__title")]'
+            company_xpath = f'(.//li[@data-occludable-job-id])[{temp_index}]//span[contains(@class, "job-card-container__company-name")]'
+            location_xpath = f'(.//li[@data-occludable-job-id])[{temp_index}]//li[contains(@class, "job-card-container__metadata-item")]'
+            apply_url_xpath = f'(.//li[@data-occludable-job-id])[{temp_index}]//a[contains(@class, "job-card-container__link")]'
 
-            heading = ""
-            link = ""
-            subheading = ""
-            experience = ""
-            salary = ""
+            position = ""
+            company = ""
+            location = ""
+            apply_url = ""
 
             try:
-                # Capturing the Heading from webpage and storing that into Heading variable.
-                heading = wait.until(EC.presence_of_element_located((By.XPATH, heading_xpath))).text
-                print(heading)
+                # Capturing the Position Name from webpage and storing that into position variable.
+                position = wait.until(EC.presence_of_element_located((By.XPATH, position_xpath))).text
+                print(position)
             except:
-                heading = "NULL"
+                position = "NULL"
             try:
-                link = wait.until(EC.presence_of_element_located((By.XPATH, link_xpath))).get_attribute('href')
-                print(link)
+                company = wait.until(EC.presence_of_element_located((By.XPATH, company_xpath))).text
+                print(company)
             except:
-                link = "NULL"
+                company = "NULL"
             try:
-                subheading = wait.until(EC.presence_of_element_located((By.XPATH, subheading_xpath))).text
-                print(subheading)
+                location = wait.until(EC.presence_of_element_located((By.XPATH, location_xpath))).text
+                print(location)
             except:
-                subheading = "NULL"
+                location = "NULL"
             try:
-                experience = wait.until(EC.presence_of_element_located((By.XPATH, experience_xpath))).text
-                print(experience)
+                apply_url = wait.until(EC.presence_of_element_located((By.XPATH, apply_url_xpath))).get_attribute('href')
+                print(apply_url)
             except:
-                experience = "NULL"
-            try:
-                salary = wait.until(EC.presence_of_element_located((By.XPATH, salary_xpath))).text
-                print(salary)
-            except:
-                salary = "Not Disclosed"
+                apply_url = "NULL"
+
             new_index += 1
             i += 1
 
             job_data = {
-            'Heading': heading,
-            'Link': link,
-            'Sub Heading': subheading,
-            'Vacancy Link': link,
-            'Experience Needed': experience,
-            'Salary': salary
+                'Position Name': position,
+                'Company Name': company,
+                'Location': location,
+                'Apply URL': apply_url
             }
 
             # Append job data to list
@@ -106,13 +84,12 @@ def scrape_linkedin(job_info):
 
             print("--------------------------- "+str(i)+" ----------------------------------")
             # Writing all the Scrapped data into CSV file.
-            csv_writer.writerow([heading, subheading, link, experience, salary])
+            csv_writer.writerow([position, company, location, apply_url])
             if i >= count:
                 break
         if i >= count:
             break
-        wait.until(EC.element_to_be_clickable((By.XPATH, '//*[text() = "Next"]'))).click()
-        new_index = 1
+
     csv_file.close()
     driver.quit()
 

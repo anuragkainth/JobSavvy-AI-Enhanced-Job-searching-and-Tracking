@@ -1,0 +1,15 @@
+/* styles.css */
+
+.sidebar .sidebar-content {
+    background-color: #333333; /* Change this to the desired background color */
+}
+
+body {
+    background-color: #BFE2FF; /* Change this to the desired background color */
+    color: #333333; /* Change text color */
+}
+
+h1 {
+    color: #FF8C00; /* Change heading color */
+}
+

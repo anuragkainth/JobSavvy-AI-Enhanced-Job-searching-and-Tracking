@@ -21,8 +21,8 @@ def scrape_monster(job_info):
     # Update the URL of the job listing page
 
      # Extract job title and location from job_info dictionary
-    job_title = job_info['Job Title'].replace(" ", "+")
-    job_location = job_info['Location'].replace(" ", "+")
+    job_title = job_info['job title'].replace(" ", "+")
+    job_location = job_info['location'].replace(" ", "+")
 
     # Construct the URL for job listings
     url = f"https://www.foundit.in/srp/results?query=%22{job_title}%22&locations={job_location}"
