@@ -78,14 +78,14 @@ def main():
 
     col1, col2 = st.columns([0.7, 2.9])
     
-    col1.image("C:/Users/hp/Desktop/project/jobsavvy-logo-2-removebg-preview.png", width=125 )
+    col1.image("C:/Users/hp/Desktop/project/Jobs LLM scrapper/images/jobsavvy-logo-2-removebg-preview.png", width=125 )
     col2.title('JobSavvy.AI 🔥')
     st.subheader('Enhanced Job searching and Tracking using AI 🔥')
 
     # Navigation bar
     
-    st.sidebar.image("C:/Users/hp/Desktop/project/6130408.png", width=140)
-    st.sidebar.subheader("Hey, Mr. User User 👋")
+    st.sidebar.image("C:/Users/hp/Desktop/project/Jobs LLM scrapper/images/6130408.png", width=140)
+    st.sidebar.subheader("Hey, Mr. Anurag Kainth 👋")
     st.sidebar.button("Sign Up")
     st.sidebar.button("Sign In")
 

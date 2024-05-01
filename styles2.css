@@ -1,0 +1,18 @@
+/* Custom styles */
+.job-search-section {
+    background-color: #f8f9fa;
+    padding: 100px 0;
+}
+
+.job-search-section h1 {
+    font-weight: bold;
+    color: #FF8C00;
+}
+
+.user-dashboard-section {
+    padding: 100px 0;
+}
+
+.text-orange {
+    color: #FF8C00;
+}

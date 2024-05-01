@@ -23,7 +23,7 @@ st.set_page_config(page_title="dashboard2", layout="wide")
 
 # Sidebar with user profile and navigation menu
 with st.sidebar:
-    st.image("C:/Users/hp/Desktop/project/6130408.png", width=170)
+    st.image("C:/Users/hp/Desktop/project/Jobs LLM scrapper/images/6130408.png", width=170)
     st.title("Hey, Mr. User User 👋")
     st.subheader("Navigate your jobs here 🔎👇")
     # st.write("User- Online")
@@ -52,10 +52,10 @@ def display_metric_with_image(column, title, value, image_path):
         st.image(image_path, width=100)
 
 # Display metrics with images
-display_metric_with_image(col1, "📌 Bookmarked", "08", "C:/Users/hp/Desktop/project/9135326.png")
-display_metric_with_image(col3, "📋 Applications", "1.7k", "C:/Users/hp/Desktop/project/6904024.png")
-display_metric_with_image(col2, "✨ Shortlisted", "03", "C:/Users/hp/Desktop/project/6130061.png")
-display_metric_with_image(col4, "💵 Accepted", "04", "C:/Users/hp/Desktop/project/7090895.png")
+display_metric_with_image(col1, "📌 Bookmarked", "08", "C:/Users/hp/Desktop/project/Jobs LLM scrapper/images/9135326.png")
+display_metric_with_image(col3, "📋 Applications", "1.7k", "C:/Users/hp/Desktop/project/Jobs LLM scrapper/images/6904024.png")
+display_metric_with_image(col2, "✨ Shortlisted", "03", "C:/Users/hp/Desktop/project/Jobs LLM scrapper/images/6130061.png")
+display_metric_with_image(col4, "💵 Accepted", "04", "C:/Users/hp/Desktop/project/Jobs LLM scrapper/images/7090895.png")
 
 st.subheader("My Jobs")
 # List different job positions
