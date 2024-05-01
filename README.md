@@ -1,5 +1,5 @@
 ﻿# JobSavvy-AI-Enhanced-Search
-## Screenshots
+## Screenshots-edited
 
 <table>
   <tr>
