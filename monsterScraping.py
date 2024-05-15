@@ -11,9 +11,14 @@ def scrape_monster(job_info):
 
     # Set Firefox options for headless browsing
     firefox_options = Options()
-    firefox_options.headless = True
+    firefox_options.add_argument('--ignore-certificate-errors')
+    firefox_options.add_argument('--ignore-ssl-errors')
+    firefox_options.add_argument("--headless")  # Run in headless mode
+    firefox_options.add_argument("--disable-gpu")
+    firefox_options.add_argument("--no-sandbox")
+    firefox_options.add_argument("--disable-dev-shm-usage")
 
-    driver = webdriver.Firefox(options=firefox_options)
+    driver = webdriver.Firefox()
     wait = WebDriverWait(driver, 20)
 
     scraped_jobs = []
@@ -31,7 +36,7 @@ def scrape_monster(job_info):
     driver.get(url)
     # https://www.foundit.in/srp/results?query=%22Flutter+Developer%22&locations=Bengaluru+%2F+Bangalore&searchId=7d9b1d74-12c2-4644-aded-6a6060e4fa36
 
-    count = 10  # Update the Number of Vacancy count you want to scrape.
+    count = 5  # Update the Number of Vacancy count you want to scrape.
 
     index, new_index, i = '0', 1, 0  # This is the index variable of the elements from which data will be scraped
     # Xpaths of the various element from which data will be scraped.

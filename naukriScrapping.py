@@ -14,7 +14,7 @@ def scrape_naukri(job_info):
     chrome_options.add_argument("--headless") 
 
     driver = webdriver.Chrome()
-    wait = WebDriverWait(driver, 20)
+    wait = WebDriverWait(driver, 30)
 
     scraped_jobs = []
 

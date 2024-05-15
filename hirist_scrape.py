@@ -11,9 +11,14 @@ def scrape_hirist(job_info):
 
     # Set Firefox options for headless browsing
     firefox_options = Options()
-    firefox_options.headless = True
+    firefox_options.add_argument('--ignore-certificate-errors')
+    firefox_options.add_argument('--ignore-ssl-errors')
+    firefox_options.add_argument("--headless")
+    firefox_options.add_argument("--disable-gpu")
+    firefox_options.add_argument("--no-sandbox")
+    firefox_options.add_argument("--disable-dev-shm-usage")
 
-    driver = webdriver.Firefox(options=firefox_options)
+    driver = webdriver.Firefox()
     wait = WebDriverWait(driver, 20)
 
     scraped_jobs = []
@@ -37,7 +42,8 @@ def scrape_hirist(job_info):
     # Writing the Heading of CSV file.
     csv_writer.writerow(['Company Name', 'Job Title', 'Experience Required', 'Location', 'Job Posting Date', 'Apply URL'])
 
-    while i < job_cards_count:
+    card_count = job_cards_count if job_cards_count <= 5 else 5
+    while i <= card_count:
 
         for j in range(job_cards_count):
             # Here we're replacing the Old index count of Xpath with New Index count.

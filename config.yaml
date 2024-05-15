@@ -1,0 +1,17 @@
+credentials:
+  usernames:
+    jsmith:
+      email: anurag@test2.com
+      name: Anurag Kainth
+      password: 123456 # Hashed password
+    rbriggs:
+      email: rbriggs@gmail.com
+      name: Rebecca Briggs
+      password: def # Hashed password
+cookie:
+  expiry_days: 30
+  key: random_signature_key
+  name: random_cookie_name
+preauthorized:
+  emails:
+  - melsby@gmail.com

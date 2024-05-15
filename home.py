@@ -1,20 +1,20 @@
 import streamlit as st
 import requests
+import webbrowser
 import secrets as secrets
-
 import google.generativeai as genai
-
 from naukriScrapping import scrape_naukri
-from indeedScraping import scrape_indeed
-from glassdoorScraping import scrape_glassdoor
 from monsterScraping import scrape_monster
-from linkedinScrapping import scrape_linkedin
 from hirist_scrape import scrape_hirist
-from internshala_scrapping import scrape_internshala
-from instahyre_scrape import scrape_instahyre
-
+import pyrebase
+import streamlit as st
+from datetime import datetime
 from dotenv import load_dotenv
+from bokeh.models.widgets import Div
 import os
+import sys
+
+# Configuration Key
 
 # Load environment variables from .env file
 load_dotenv()
@@ -66,184 +66,285 @@ def call_gemini_api(search_query):
     # print(convo.last.text)
 
     return convo.last.text
-
 def local_css(file_name):
     with open(file_name) as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 # Streamlit app
-def main():
 
-    # Call the CSS function to load the local CSS file
+def bookmark_job(title, company, experience, location, link, email):
+    data = {
+        'email': email,
+        'title': title,
+        'company': company,
+        'experienceRequired': experience,
+        'location': location,
+        'applyUrl': link
+    }
+    print(email)
+    print(title)
+    print(company)
+    print(experience)
+    print(location)
+    print(link)
+    response = requests.post('http://localhost:4000/api/user/bookmarkjob/', json=data)
+    if response.status_code == 201:
+        st.success("Job bookmarked successfully!")
+    else:
+        try:
+            error_data = response.json()
+            st.error(f"Failed to bookmark job. Error: {error_data['error']}")
+        except:
+            st.error("Failed to bookmark job. Please try again.")
+
+
+script = """
+<script>
+    function bookmarkJob(title, company, experience, location, link, email) {
+    
+        var data = {
+            email: email,
+            title: title,
+            company: company,
+            experienceRequired: experience,
+            location: location,
+            applyUrl: link
+        };
+
+        fetch('http://localhost:4000/api/bookmarkjob/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message); // Display success message
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }
+</script>
+"""
+alert_script = """
+<script>
+function showAlert(message) {
+  alert(message);
+}
+</script>
+"""
+st.markdown(script, unsafe_allow_html=True)
+st.markdown(alert_script, unsafe_allow_html=True)
+def trigger_alert(message):
+    st.markdown(f'<script>showAlert("{message}")</script>', unsafe_allow_html=True)
+
+def main():
+    
+    #Initialize Firebase
+    firebase = pyrebase.initialize_app(firebaseConfig)
+    auth = firebase.auth()
+    db = firebase.database()
+
+    # Initialize user_name variable to None
+    if 'user_name' not in st.session_state:
+        st.session_state['user_name'] = None
+
+    # Load local CSS file
+    def local_css(file_name):
+        with open(file_name) as f:
+            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
     local_css("styles.css")
 
+    # App layout
     col1, col2 = st.columns([0.7, 2.9])
-    
-    col1.image("C:/Users/hp/Desktop/project/Jobs LLM scrapper/images/jobsavvy-logo-2-removebg-preview.png", width=125 )
+    col1.image("images/jobsavvy-logo-2-removebg-preview.png", width=125)
     col2.title('JobSavvy.AI 🔥')
     st.subheader('Enhanced Job searching and Tracking using AI 🔥')
 
     # Navigation bar
-    
-    st.sidebar.image("C:/Users/hp/Desktop/project/Jobs LLM scrapper/images/6130408.png", width=140)
-    st.sidebar.subheader("Hey, Mr. Anurag Kainth 👋")
-    st.sidebar.button("Sign Up")
-    st.sidebar.button("Sign In")
+    st.sidebar.subheader("Hey, " + (st.session_state['user_name'] if st.session_state['user_name'] else "User") + " 👋")
+    choice = st.sidebar.selectbox('Login/Signup', ['Login', 'Sign up'])
 
-    page = st.sidebar.selectbox("Menu", ["Select Option", "Dashboard", "Sign Out"])
+    # Obtain user input for email and password
+    email = st.sidebar.text_input('Please enter your email address')
+    password = st.sidebar.text_input('Please enter your password', type='password')
 
-    #connecting to dashboard2
-    if page == "Dashboard":
-        if st.sidebar.button('Dashboard'):
-            os.system("streamlit run dashboard2.py")
+    # Sign up
+    if choice == 'Sign up':
+        handle = st.sidebar.text_input('Please input your full name', value='')
+        submit = st.sidebar.button('Create my account')
+
+        if submit:
+            try:
+                user = auth.create_user_with_email_and_password(email, password)
+                st.success('Your account is created successfully!')
+                st.balloons()
+                # Sign in
+                    
+                db.child(user['localId']).child("Handle").set(handle)
+                db.child(user['localId']).child("ID").set(user['localId'])
+                # Set user_name after successful signup
+                st.session_state['user_name'] = handle
+                # st.title('Welcome ' + handle)
+                st.sidebar.write("Welcome! You are sucessfully signed up!")
+                st.sidebar.write(handle)
+                # st.info('Login via login drop down selection')
+                # Make a POST request to save user details in backend
+                api_url = "http://localhost:4000/api/user/userdetails/"
+                data = {"name": handle, "email": email}
+                response = requests.post(api_url, json=data)
+                if response.status_code == 201:
+                    st.sidebar.write("User details saved successfully!")
+                    trigger_alert("You have signed up successfully!")
+                else:
+                    st.sidebar.error("Failed to save user details")
+                    trigger_alert("Error: Unable to Signup. Please try again later.")
+                    
+            except Exception as e:
+                st.sidebar.error("Failed to create account")
+                print(e)
+
+    # Login
+    if choice == 'Login':
+        login = st.sidebar.button('Login')
+        if login:
+            # print('hi')
+            # bookmark_job("job['Heading']", "job['Sub Heading']", "job['Experience Needed']", '', "job['Link']", "anurag@anurag.com")
+            try:
+                user = auth.sign_in_with_email_and_password(email, password)
+                # Retrieve user's handle from the database
+                user_handle = db.child(user['localId']).child("Handle").get()
+                if user_handle != None:
+                    user_handle = user_handle.val()
+                    # print(user_handle)
+                    st.session_state['user_name'] = user_handle
+                    st.sidebar.success('Welcome! You are sucessfully logged in!')
+                    trigger_alert("You have signed up successfully!")
+                    # st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', unsafe_allow_html=True)
+                    # bio = st.radio('Jump to', ['Home', 'Workplace Feeds', 'Settings'])
+                    # st.sidebar.write("Welcome! You are sucessfully logged in as:")
+                    st.sidebar.write("Email: " + email)
+                else:
+                    st.sidebar.error("User not found in the database")
+                    trigger_alert("Error: User not found in the database. Please try again later.")
+            except Exception as e:
+                st.sidebar.error("Invalid email or password")
+                trigger_alert("Invalid email or password. Please try again later.")
+                print(e)
+
+    # Show dashboard and sign out option only if user is logged in
+    if st.session_state['user_name']:
+        if st.sidebar.button("Dashboard"):
+            os.system(f"streamlit run dashboard_main.py {email}")
+
+        if st.sidebar.button("Sign Out"):
+            # Clear user_name to signify sign out
+            st.session_state['user_name'] = None
+            st.success("Logged out successfully!")  
+            st.rerun()
 
     search_query = st.text_input('Enter your search query')
 
-    filter_options = ['Naukri.com', 'foundit.in (Monster.com)', 'LinkedIn.com', 'Glassdoor.com', 'Indeed.com', 'Hirist.tech', 'Instahyre.com']
+    filter_options = ['Naukri.com', 'foundit.in (Monster.com)', 'Hirist.tech']
     selected_filters = st.multiselect('Select Top Websites to Explore:', filter_options)
-
-    # # Display selected filters
-    # if selected_filters:
-    #     st.write('Select Top Websites to Explore:')
-    #     for filter_name in selected_filters:
-    #         st.write(f'{filter_name}')
-
-
-    if st.button('Search'):
-        gemini_response = call_gemini_api(search_query)
-        print(gemini_response)
-        job_info = gemini_text_to_map(gemini_response)
-        print(job_info)
-
-        i = 1
-
-        # Display the list of scraped jobs using Streamlit components
-        if 'Naukri.com' in selected_filters:
-
-            scraped_naukri_jobs = scrape_naukri(job_info)
-            if scraped_naukri_jobs:
-                st.write('### Jobs according to your perference:')
-                for job in scraped_naukri_jobs:
-                    st.markdown(
+    
+    
+    if st.button('Search', key='goodsearch'):
+        if st.session_state['user_name'] == None:
+            st.error("Failed to fetch jobs. Please Login to your account.")
+        else:    
+            gemini_response = call_gemini_api(search_query)
+            print(gemini_response)
+            job_info = gemini_text_to_map(gemini_response)
+            print(job_info)
+            i = 1
+            # Display the list of scraped jobs using Streamlit components
+            if 'Naukri.com' in selected_filters:
+                scraped_naukri_jobs = scrape_naukri(job_info)
+                if scraped_naukri_jobs:
+                    st.write('### Jobs according to your perference:')
+                    for job in scraped_naukri_jobs:
+                        heading = job['Heading']
+                        sub_heading = job['Sub Heading']
+                        experience_needed = job['Experience Needed']
+                        link = job['Link']
+                        print(email)
+                        print(heading)
+                        if  st.button(f"Bookmark Job {i} ⭐", on_click=lambda: bookmark_job(job['Heading'], job['Sub Heading'], job['Experience Needed'], "", job['Link'], email)):
+                            bookmark_job(heading, sub_heading, experience_needed, '', link, email)
+                        st.markdown(
+                            f"""
+                            <div style="padding: 10px; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 10px;">
+                                <h3>Job {i}: {job["Heading"]} @ naukri.com</h3>
+                                <p><strong>Company:</strong> {job["Sub Heading"]}</p>
+                                <p><strong>Experience Needed:</strong> {job["Experience Needed"]}</p>
+                                <p><strong>Salary:</strong> {job["Salary"]}</p>
+                                <p><a href="{job['Link']}" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #fb4c4c; color: #fff; text-decoration: none; border: none; border-radius: 5px; cursor: pointer;">Apply</a></p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                            # st.success("Job bookmarked successfully!")
+                        i += 1
+                else:
+                    st.write('No jobs found.')
+            if 'foundit.in (Monster.com)' in selected_filters:            
+                scraped_monster_jobs = scrape_monster(job_info)
+                if scraped_monster_jobs:
+                    # st.write('### Naukri.com Jobs according to your perference:')
+                    for job in scraped_monster_jobs:
+                        heading = job['Heading']
+                        sub_heading = job['Sub Heading']
+                        experience_needed = job['Experience Needed']
+                        location = job['Location']
+                        link = job['Link']
+                        if  st.button(f"Bookmark Job {i} ⭐", on_click=lambda: bookmark_job(job['Heading'], job['Sub Heading'], job['Experience Needed'], job['Location'], job['Link'], email)):
+                            bookmark_job(heading, sub_heading, experience_needed, '', link, email)
+                        st.markdown(
                         f"""
                         <div style="padding: 10px; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 10px;">
-                            <h3>Job {i}: {job["Heading"]} @ naukri.com</h3>
+                            <h3>Job {i}: {job["Heading"]} @ monster.com</h3>
                             <p><strong>Company:</strong> {job["Sub Heading"]}</p>
                             <p><strong>Experience Needed:</strong> {job["Experience Needed"]}</p>
-                            <p><strong>Salary:</strong> {job["Salary"]}</p>
-                            <p><strong>Vacancy Link:</strong> <a href="{job["Link"]}">{job["Link"]}</a></p>
-                            <hr>
-                            ⭐️ "Add to bookmarks"
+                            <p><strong>Location:</strong> {job["Location"]}</p>
+                            <p><a href="{job['Link']}" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #fb4c4c; color: #fff; text-decoration: none; border: none; border-radius: 5px; cursor: pointer;">Apply</a></p>
                         </div>
                         """,
                         unsafe_allow_html=True
                     )
-                    i += 1
-            else:
-                st.write('No jobs found.')
-
-
-        if 'foundit.in (Monster.com)' in selected_filters:            
-            scraped_monster_jobs = scrape_monster(job_info)
-
-            if scraped_monster_jobs:
-                # st.write('### Naukri.com Jobs according to your perference:')
-                for job in scraped_monster_jobs:
-                    st.markdown(
-                    f"""
-                    <div style="padding: 10px; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 10px;">
-                        <h3>Job {i}: {job["Heading"]} @ monster.com</h3>
-                        <p><strong>Company:</strong> {job["Sub Heading"]}</p>
-                        <p><strong>Experience Needed:</strong> {job["Experience Needed"]}</p>
-                        <p><strong>Location:</strong> {job["Location"]}</p>
-                        <p><strong>Vacancy Link:</strong> <a href="{job["Link"]}">{job["Link"]}</a></p>
-                        <hr>
-                        ⭐️ "Add to bookmarks"
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-                    i += 1
-            else:
-                st.write('No jobs found.')  
-        
-
-        if 'Hirist.tech' in selected_filters:
-            scraped_hirist_jobs = scrape_hirist(job_info)
-
-            if scraped_hirist_jobs:
-                # st.write('### Naukri.com Jobs according to your perference:')
-                for job in scraped_hirist_jobs:
-                    st.markdown(
-                    f"""
-                    <div style="padding: 10px; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 10px;">
-                        <h3>Job {i}: {job["Job Title"]} @ hirist.tech</h3>
-                        <p><strong>Company:</strong> {job["Company Name"]}</p>
-                        <p><strong>Location:</strong> {job["Location"]}</p>
-                        <p><strong>Experience:</strong> {job["Experience Required"]}</p>
-                        <p><strong>Posting Date:</strong> {job["Job Posting Date"]}</p>
-                        <p><strong>Vacancy Link:</strong> <a href="{job["Apply URL"]}">{job["Apply URL"]}</a></p>
-                        <hr>
-                        ⭐️ "Add to bookmarks"
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-                    i += 1
-            else:
-                st.write('No jobs found.') 
-
-
-        # scraped_instahyre_jobs = scrape_instahyre(job_info)
-
-        # # Display the list of scraped jobs using Streamlit components
-        # if scraped_instahyre_jobs:
-        #     st.write('### Jobs according to your perference:')
-        #     for job in scraped_instahyre_jobs:
-        #         st.write(f'**Job {i}:** {job["Job Title"]} @ instahyre.com') # Heading
-        #         st.write(f'**Experience Needed:** {job["Experience Required"]}') # Experience Needed
-        #         st.write(f'**Location:** {job["Location"]}') # Location
-        #         st.write(f'**Company Founded:** {job["Company Founded"]}') # Job Type
-        #         st.write(f'**No. of Employees:** {job["No. of Employees"]}') # Job Type
-        #         st.write(f'**job Description:** {job["Job Description"]}') # Salary
-        #         st.write(f'**Vacancy Link:** [{job["Apply URL"]}]') # Vacancy Link
-        #         st.write('---')
-        #         i += 1
-        # else:
-        #     st.write('No jobs found.')
-
-        # scraped_internshala_jobs = scrape_internshala(job_info)
-        # # Display the list of scraped jobs using Streamlit components
-        # if scraped_internshala_jobs:
-        #     st.write('### Jobs according to your perference:')
-        #     for job in scraped_internshala_jobs:
-        #         st.write(f'**Job {i}:** {job["Job Title"]} @ internshala.com') # Heading
-        #         st.write(f'**Company:** {job["Company Name"]}') # Sub Heading
-        #         st.write(f'**Experience Needed:** {job["Experience Required"]}') # Experience Needed
-        #         st.write(f'**Salary:** {job["Salary"]}') # Salary
-        #         st.write(f'**Location:** {job["Location"]}') # Experience Needed
-        #         st.write(f'**Start Date:** {job["Start Date"]}') # Salary
-        #         st.write(f'**Vacancy Link:** [{job["Apply URL"]}]') # Vacancy Link
-        #         st.write('---')
-        #         i += 1
-        # else:
-        #     st.write('No jobs found.')
-
-
-        # scraped_linkedin_jobs = scrape_linkedin(job_info)
-
-        # if scraped_linkedin_jobs:
-        #     # st.write('### Naukri.com Jobs according to your perference:')
-        #     for job in scraped_linkedin_jobs:
-        #         st.write(f'**Job {i``}:** {job["Position Name"]} @ linkedIn.com') # Heading
-        #         st.write(f'**Company:** {job["Company Name"]}') # Sub Heading
-        #         st.write(f'**Location:** {job["Location"]}') # Salary
-        #         st.write(f'**Vacancy Link:** [{job["Apply URL"]}]') # Vacancy Link
-        #         st.write('---')
-        #         i += 1
-        # else:
-        #     st.write('No jobs found.') 
-        
-        # Print clean dictionary of Gemini response in terminal
+                        i += 1
+                else:
+                    st.write('No jobs found.')  
+            if 'Hirist.tech' in selected_filters:
+                scraped_hirist_jobs = scrape_hirist(job_info)
+                if scraped_hirist_jobs:
+                    # st.write('### Naukri.com Jobs according to your perference:')
+                    for job in scraped_hirist_jobs:
+                        heading = job['Job Title']
+                        sub_heading = job['Company Name']
+                        experience_needed = job['Experience Required']
+                        location = job['Location']
+                        link = job['Apply URL']
+                        if  st.button(f"Bookmark Job {i} ⭐", on_click=lambda: bookmark_job(job['Job Title'], job['Company Name'], job['Experience Required'], job['Location'], job['Apply URL'], email)):
+                            bookmark_job(heading, sub_heading, experience_needed, '', link, email)
+                        st.markdown(
+                        f"""
+                        <div style="padding: 10px; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 10px;">
+                            <h3>Job {i}: {job["Job Title"]} @ hirist.tech</h3>
+                            <p><strong>Company:</strong> {job["Company Name"]}</p>
+                            <p><strong>Location:</strong> {job["Location"]}</p>
+                            <p><strong>Experience:</strong> {job["Experience Required"]}</p>
+                            <p><strong>Posting Date:</strong> {job["Job Posting Date"]}</p>
+                            <p><a href="{job['Apply URL']}" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #fb4c4c; color: #fff; text-decoration: none; border: none; border-radius: 5px; cursor: pointer;">Apply</a></p>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                        i += 1
+                else:
+                    st.write('No jobs found.') 
 
 def parse_gemini_response(input_string):
     
