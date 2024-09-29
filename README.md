@@ -3,21 +3,21 @@
 JobSavvy is a Streamlit-based web application that uses AI to enhance job search and tracking. It combines job scraping from popular job portals, Firebase for user authentication, and MongoDB for job management.
 
 ## Features
-- AI-powered job searching using Google API
-- Job scraping from Naukri, Hirist, and Foundit using Selenium
-- User dashboard for job tracking and management (e.g., bookmarked, applied, interviewing, negotiating, accepted) via MongoDB
-- Firebase integration for user authentication
+- AI-powered job searching using Google API.
+- Job scraping from Naukri, Hirist, and Foundit using Selenium.
+- User dashboard for job tracking and management (e.g., bookmarked, applied, interviewing, negotiating, accepted) via MongoDB.
+- Firebase integration for user authentication.
 
 ## Prerequisites
 To run this application, you will need:
-- Basic understanding of Python (including Streamlit) and JavaScript (including Node.js)
-- Familiarity with Docker for containerization
-- A pre-fetched Google API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
-- A pre-configured Firebase app on the [Firebase Console](https://console.firebase.google.com/)
-- A MongoDB database set up on MongoDB Cloud using [MongoDB Atlas](https://www.mongodb.com/docs/atlas/getting-started/)
+- Basic understanding of Python (including Streamlit) and JavaScript (including Node.js).
+- Familiarity with Docker for containerization.
+- A pre-fetched Google API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+- A pre-configured Firebase app on the [Firebase Console](https://console.firebase.google.com/).
+- A MongoDB database set up on MongoDB Cloud using [MongoDB Atlas](https://www.mongodb.com/docs/atlas/getting-started/).
 
 ## Environment Variables
-Create a `.env` file in both the frontend and backend directories and include the following variables:
+Create a `.env` file in root directory and include the following variables:
 
 ```bash
 # Google API Key
@@ -52,7 +52,7 @@ FIREBASE_MEASUREMENT_ID="your-firebase-measurement-id-here"
    ```bash
    npm install
    ```
-3. Add the MongoDB URI to the .env file and place the Firebase JSON file in the server directory.
+3. Add the MongoDB URI to the `.env` file and place the Firebase JSON file in the `server` directory.
 4. Start the backend server:
    ```
    npm run dev
@@ -60,11 +60,11 @@ FIREBASE_MEASUREMENT_ID="your-firebase-measurement-id-here"
 ### Frontend
 1. Navigate to the frontend directory.
 2. Install Python dependencies:
-   ```py
+   ```python
    pip install -r requirements.txt
    ```
 3. Run the Streamlit app:
-   ```py
+   ```python
    streamlit run home.py
    ```
 
