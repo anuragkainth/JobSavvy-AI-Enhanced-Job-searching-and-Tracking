@@ -11,7 +11,12 @@ def scrape_naukri(job_info):
 
      # Set Chrome options for headless browsing
     chrome_options = Options()
-    chrome_options.add_argument("--headless") 
+    chrome_options.binary_location = "/usr/bin/chromium"  # Path to Chromium binary
+    chrome_options.add_argument("--headless")  # Run in headless mode
+    chrome_options.add_argument("--no-sandbox")  # Bypass OS security model
+    chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
+    chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration (optional)
+    chrome_options.add_argument("--window-size=1920x1080")  # Set a default window size
 
     driver = webdriver.Chrome()
     wait = WebDriverWait(driver, 30)
@@ -19,7 +24,7 @@ def scrape_naukri(job_info):
     scraped_jobs = []
 
     # Update the URL of Naukri Page! ( Make Sure that the page link which you're putting must be a job listing page and it must have Next page buttons. )
-    driver.get(f"https://www.naukri.com/{job_info["job title"]}-jobs-in-{job_info["location"]}&experience={job_info["experience"]}")
+    driver.get(f"https://www.naukri.com/{job_info['job title']}-jobs-in-{job_info['location']}&experience={job_info['experience']}")
 
     count = 10  # Update the Number of Vacancy count you want to scrape.
 
