@@ -2,6 +2,8 @@
 
 JobSavvy is a Streamlit-based web application that uses AI to enhance job search and tracking. It combines job scraping from popular job portals, Firebase for user authentication, and MongoDB for job management.
 
+![JobSavvy Preview Image](./images/job-savvy-image-prev-1.png)
+
 ## Features
 - AI-powered job searching using Google API.
 - Job scraping from Naukri, Hirist, and Foundit using Selenium.
