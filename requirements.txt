@@ -5,3 +5,4 @@ selenium
 Pyrebase4
 python-dotenv
 bokeh
+aiohttp
