@@ -1,3 +1,4 @@
 .env
 server/jobsavvyai-firebase.json
 server/jobsavvyai-8db21e20d5ca.json
+__pycache__

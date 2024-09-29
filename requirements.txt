@@ -1,0 +1,7 @@
+# requirements.txt
+streamlit
+google-generativeai
+selenium
+Pyrebase4
+python-dotenv
+bokeh
