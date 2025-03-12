@@ -31,17 +31,11 @@ def scrape_naukri(job_info):
     index, new_index, i = '0', 1, 0  # This the the index variable of the elements from which data will be Scraped
     # Xpaths of the various element from which data will be scraped.
 
-    # heading_xpath = '(//*[@class="jobTuple bgWhite br4 mb-8"])['+index+']/div/div/a'
-    # link_xpath = '(//*[@class="jobTuple bgWhite br4 mb-8"])['+index+']/div/div/a'
-    # subheading_xpath = '(//*[@class="jobTuple bgWhite br4 mb-8"])['+index+']/div/div/div/a'
-    # experience_xpath = '(//*[@class="jobTuple bgWhite br4 mb-8"])['+index+']/div/div/ul/li[1]/span'
-    # salary_xpath = '(//*[@class="jobTuple bgWhite br4 mb-8"])['+index+']/div/div/ul/li[2]/span'
-
-    heading_xpath = '(//*[@class="cust-job-tuple layout-wrapper lay-2 sjw__tuple "])[' + index + ']/div[@class=" row1"]/a'
-    link_xpath = '(//*[@class="cust-job-tuple layout-wrapper lay-2 sjw__tuple "])[' + index + ']/div[@class=" row1"]/a'   
-    subheading_xpath = '(//*[@class="cust-job-tuple layout-wrapper lay-2 sjw__tuple "])[' + index + ']/div[@class=" row2"]/span[@class=" comp-dtls-wrap"]/a'
-    experience_xpath = '(//*[@class="cust-job-tuple layout-wrapper lay-2 sjw__tuple "])[' + index + ']/div[@class=" row3"]/div[@class="job-details "]/span[@class="exp-wrap"]/span[@class="ni-job-tuple-icon ni-job-tuple-icon-srp-experience exp"]/span'
-    salary_xpath = '(//*[@class="cust-job-tuple layout-wrapper lay-2 sjw__tuple "])[' + index + ']/div[@class=" row3"]/div[@class="job-details "]/span[@class="sal-wrap ver-line"]/span[@class="ni-job-tuple-icon ni-job-tuple-icon-srp-rupee sal"]'
+    heading_xpath = f'(//div[contains(@class, "cust-job-tuple") and contains(@class, "sjw__tuple")])[{index}]/div[contains(@class, "row1")]/h2/a'
+    link_xpath = f'(//div[contains(@class, "cust-job-tuple") and contains(@class, "sjw__tuple")])[{index}]/div[contains(@class, "row1")]/h2/a'
+    subheading_xpath = f'(//div[contains(@class, "cust-job-tuple") and contains(@class, "sjw__tuple")])[{index}]/div[contains(@class, "row2")]/span[contains(@class, "comp-dtls-wrap")]/a'
+    experience_xpath = f'(//div[contains(@class, "cust-job-tuple") and contains(@class, "sjw__tuple")])[{index}]/div[contains(@class, "row3")]/div[contains(@class, "job-details")]/span[contains(@class, "exp-wrap")]/span//span[@class="expwdth"]'
+    salary_xpath = f'(//div[contains(@class, "cust-job-tuple") and contains(@class, "sjw__tuple")])[{index}]/div[contains(@class, "row3")]/div[contains(@class, "job-details")]/span[contains(@class, "sal-wrap")]/span//span[@title]'
 
     csv_file = open('Naukri_scrape.csv', 'a', encoding="utf-8", newline='')
     csv_writer = csv.writer(csv_file)
@@ -70,7 +64,8 @@ def scrape_naukri(job_info):
                 # Capturing the Heading from webpage and storing that into Heading variable.
                 heading = wait.until(EC.presence_of_element_located((By.XPATH, heading_xpath))).text
                 print(heading)
-            except:
+            except Exception as e:
+                print(f"Error occurred while fetching heading: {e}")
                 heading = "NULL"
             try:
                 link = wait.until(EC.presence_of_element_located((By.XPATH, link_xpath))).get_attribute('href')
