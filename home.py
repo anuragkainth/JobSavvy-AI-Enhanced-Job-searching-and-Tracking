@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import webbrowser
 import secrets as secrets
-import google.generativeai as genai
+from google import genai
 from naukriScrapping import scrape_naukri
 from monsterScraping import scrape_monster
 from hirist_scrape import scrape_hirist
@@ -21,51 +21,23 @@ load_dotenv()
 
 # Access the API key
 api_key = os.getenv("API_KEY")
-
-genai.configure(api_key=api_key)
+client = genai.Client(api_key=api_key)
 
 # Function to call Gemini API with initial prompt
-def call_gemini_api(search_query):
+def call_gemini_api(search_query):    
 
-    # Set up the model
-    generation_config = {
-    "temperature": 0.9,
-    "top_p": 1,
-    "top_k": 1,
-    "max_output_tokens": 2048,
-    }
 
-    safety_settings = [
-    {
-        "category": "HARM_CATEGORY_HARASSMENT",
-        "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-    },
-    {
-        "category": "HARM_CATEGORY_HATE_SPEECH",
-        "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-    },
-    {
-        "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-        "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-    },
-    {
-        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-        "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-    },
-    ]
+    initial_prompt = "Extract these 4 keywords from given prompt Job Title, Experience, Location, Work Mode. For Example if the prompt is Flutter Developer Internships in gurugram with 2 years of experience, then i want response as Job Title: Flutter Developer Internship, Experience: 2, Location: Gurugram, Work Mode: NA, all are sepereated in new line. Use NA if anything is missing. here is the prompt: "
 
-    model = genai.GenerativeModel(model_name="gemini-1.0-pro",
-                                generation_config=generation_config,
-                                safety_settings=safety_settings)
+    user_prompt = initial_prompt + search_query
 
-    convo = model.start_chat(history=[
-    ])
+    response = client.models.generate_content(
+        model='gemini-2.0-flash',
+        contents=user_prompt
+    )
 
-    initialPrompt = "Extract these 4 keywords from given prompt Job Title, Experience, Location, Work Mode. For Example if the prompt is Flutter Developer Internships in gurugram with 2 years of experience, then i want response as Job Title: Flutter Developer Internship, Experience: 2, Location: Gurugram, Work Mode: NA, all are sepereated in new line. Use NA if anything is missing. here is the prompt: "
-    convo.send_message(initialPrompt + search_query)
-    # print(convo.last.text)
+    return response.text
 
-    return convo.last.text
 def local_css(file_name):
     with open(file_name) as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
